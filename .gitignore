@@ -1,0 +1,8 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.env
+.DS_Store
+# Generated market data is reproducible; do not commit large or refreshed CSVs by default.
+data/*.csv
