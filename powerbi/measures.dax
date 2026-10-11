@@ -1,0 +1,27 @@
+-- Create these measures in Power BI after importing dbo.StockPrices.
+Latest Close =
+VAR LatestDate = MAXX(ALLSELECTED(StockPrices), StockPrices[TradeDate])
+RETURN
+    CALCULATE(MAX(StockPrices[ClosePrice]), StockPrices[TradeDate] = LatestDate)
+
+Total Trading Volume = SUM(StockPrices[Volume])
+
+Average Daily Volume = AVERAGE(StockPrices[Volume])
+
+Average Daily Return % = AVERAGE(StockPrices[DailyReturnPct])
+
+-- Requires a date table named DimDate related to StockPrices[TradeDate].
+Five Year / Selected Period Return % =
+VAR FirstDate = MIN(DimDate[Date])
+VAR LastDate = MAX(DimDate[Date])
+VAR FirstClose = CALCULATE(MIN(StockPrices[ClosePrice]), DimDate[Date] = FirstDate)
+VAR LastClose = CALCULATE(MAX(StockPrices[ClosePrice]), DimDate[Date] = LastDate)
+RETURN DIVIDE(LastClose - FirstClose, FirstClose)
+
+Annualized Volatility % =
+VAR DailyStdDev = STDEVX.P(VALUES(StockPrices[TradeDate]), [Average Daily Return %])
+RETURN DailyStdDev * SQRT(252)
+
+-- Create a calculated table for the date slicer/model relationship:
+-- DimDate = CALENDAR(MIN(StockPrices[TradeDate]), MAX(StockPrices[TradeDate]))
+-- Add columns: Year = YEAR(DimDate[Date]); Month = FORMAT(DimDate[Date], "MMM"); YearMonth = FORMAT(DimDate[Date], "YYYY-MM")
